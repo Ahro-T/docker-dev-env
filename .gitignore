@@ -1,0 +1,22 @@
+# Secrets
+.env
+*.pem
+*.key
+id_rsa
+id_ed25519
+
+# Local editor / OS
+.DS_Store
+.vscode/
+.idea/
+
+# Dependencies / build output
+node_modules/
+target/
+dist/
+build/
+
+# Codex / OMX local state
+.codex/
+.omx/state/
+.omx/logs/
