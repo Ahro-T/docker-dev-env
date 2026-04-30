@@ -9,7 +9,6 @@ services:
       - codex-home:/root/.codex
       - npm-cache:/root/.npm
       - cargo-cache:/root/.cargo
-      - gh-config:/root/.config/gh
     tty: true
     stdin_open: true
 
@@ -17,4 +16,3 @@ volumes:
   codex-home:
   npm-cache:
   cargo-cache:
-  gh-config:

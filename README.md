@@ -60,4 +60,4 @@ Recommended choices:
 - HTTPS
 - Login with a web browser
 
-The `gh-config` Docker volume keeps GitHub CLI authentication across normal container deletion.
+GitHub login is not persisted by default. If you delete and recreate the container, run `gh auth login` again.
