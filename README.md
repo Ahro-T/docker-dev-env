@@ -30,6 +30,18 @@ node -v
 cargo --version
 tmux -V
 gh --version
+codex --version
+omx --version
+omx doctor
+```
+
+## Codex / OMX setup
+
+Inside the container, initialize Codex and OMX:
+
+```bash
+codex --login
+omx setup
 omx doctor
 ```
 

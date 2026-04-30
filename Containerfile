@@ -6,5 +6,7 @@ RUN apt-get update && apt-get install -y \
     cargo rustc \
  && rm -rf /var/lib/apt/lists/*
 
+RUN npm install -g @openai/codex oh-my-codex
+
 RUN mkdir -p /workspace
 WORKDIR /workspace
