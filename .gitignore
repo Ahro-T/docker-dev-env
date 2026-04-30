@@ -20,3 +20,5 @@ build/
 .codex/
 .omx/state/
 .omx/logs/
+# Host-mounted working directory
+workspace/

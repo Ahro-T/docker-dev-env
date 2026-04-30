@@ -4,6 +4,8 @@ services:
       context: .
       dockerfile: Containerfile
     working_dir: /workspace
+    volumes:
+      - ./workspace:/workspace
     tty: true
     stdin_open: true
     command: sleep infinity
