@@ -60,3 +60,8 @@ GitHub login is not persisted. If you delete and recreate the container, run `gh
 ## No persistent volumes
 
 This compose file deliberately has no `volumes:` section. That means container-local caches, login state, and files created only inside the container are disposable. Keep important project files in GitHub or another host-managed location.
+
+
+## Podman note
+
+This image explicitly creates `/workspace` before setting it as the working directory so `podman-compose` can start the container with `-w /workspace`.

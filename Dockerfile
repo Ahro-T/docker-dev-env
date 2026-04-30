@@ -6,4 +6,5 @@ RUN apt-get update && apt-get install -y \
     cargo rustc \
  && rm -rf /var/lib/apt/lists/*
 
+RUN mkdir -p /workspace
 WORKDIR /workspace
