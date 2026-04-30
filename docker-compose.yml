@@ -4,15 +4,5 @@ services:
       context: .
       dockerfile: Dockerfile
     working_dir: /workspace
-    volumes:
-      - .:/workspace
-      - codex-home:/root/.codex
-      - npm-cache:/root/.npm
-      - cargo-cache:/root/.cargo
     tty: true
     stdin_open: true
-
-volumes:
-  codex-home:
-  npm-cache:
-  cargo-cache:

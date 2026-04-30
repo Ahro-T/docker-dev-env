@@ -1,11 +1,11 @@
 # Docker Dev Environment
 
-Disposable Docker development environment for daily work with Codex/OMX.
+Disposable Docker development environment for daily work with Codex/OMX. This setup intentionally does not persist Docker volumes.
 
 ## Files
 
 - `Dockerfile`: builds the development image.
-- `docker-compose.yml`: starts the development container and keeps useful caches in Docker volumes.
+- `docker-compose.yml`: starts the development container without persistent volumes.
 - `.gitignore`: prevents secrets, local state, and build output from being committed.
 - `.env.example`: safe example environment file.
 
@@ -33,17 +33,11 @@ exit
 docker compose down
 ```
 
-Avoid this unless you intentionally want to delete saved Codex/npm/cargo volumes:
-
-```bash
-docker compose down -v
-```
-
 ## Mental model
 
 - `Dockerfile` = how to build the image.
 - `docker-compose.yml` = how to run the container.
-- Docker volumes = saved storage that survives normal container deletion.
+- No Docker volumes are configured, so container-local state is disposable.
 
 
 ## GitHub login
@@ -60,4 +54,9 @@ Recommended choices:
 - HTTPS
 - Login with a web browser
 
-GitHub login is not persisted by default. If you delete and recreate the container, run `gh auth login` again.
+GitHub login is not persisted. If you delete and recreate the container, run `gh auth login` again.
+
+
+## No persistent volumes
+
+This compose file deliberately has no `volumes:` section. That means container-local caches, login state, and files created only inside the container are disposable. Keep important project files in GitHub or another host-managed location.
