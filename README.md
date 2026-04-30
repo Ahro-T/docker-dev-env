@@ -22,6 +22,7 @@ docker compose exec dev bash
 node -v
 cargo --version
 tmux -V
+gh --version
 omx doctor
 ```
 
@@ -43,3 +44,20 @@ docker compose down -v
 - `Dockerfile` = how to build the image.
 - `docker-compose.yml` = how to run the container.
 - Docker volumes = saved storage that survives normal container deletion.
+
+
+## GitHub login
+
+Inside the container, run:
+
+```bash
+gh auth login
+```
+
+Recommended choices:
+
+- GitHub.com
+- HTTPS
+- Login with a web browser
+
+The `gh-config` Docker volume keeps GitHub CLI authentication across normal container deletion.
