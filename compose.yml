@@ -4,6 +4,10 @@ services:
       context: .
       dockerfile: Containerfile
     working_dir: /workspace
+    volumes:
+      # Host-visible scratch/export area only. Do normal project work in the
+      # container-local /workspace directory, not in this mounted path.
+      - ./workspace:/host-workspace
     tty: true
     stdin_open: true
     command: sleep infinity

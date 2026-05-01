@@ -1,18 +1,19 @@
 # Podman Dev Environment
 
-Disposable Podman development environment for daily work with Codex/OMX. This setup intentionally does not use persistent volumes, so the container can be deleted and recreated from GitHub without preserving local state.
+Disposable Podman development environment for daily work with Codex/OMX. The container keeps normal work in container-local `/workspace`; the host-mounted `./workspace` directory is available only as a scratch/export area at `/host-workspace`.
 
 ## Files
 
 - `Containerfile`: builds the development image with Node, rustup-managed Rust, Codex, OMX, tmux, GitHub CLI, Korean UTF-8 locale support, non-secret OMX setup, and prebuilt OMX Rust helpers.
-- `compose.yml`: starts the disposable development container without volumes.
+- `compose.yml`: starts the development container with `/workspace` as the local working directory and `./workspace` mounted separately at `/host-workspace`.
 - `scripts/bootstrap.sh`: verifies the baked tools and OMX health inside the container.
-- `.gitignore`: prevents secrets, local state, and build output from being committed.
+- `.gitignore`: prevents secrets, local state, local scratch files, and build output from being committed.
 - `.env.example`: safe example environment file.
 
 ## Start
 
 ```bash
+mkdir -p workspace
 podman compose up -d --build
 podman compose exec dev bash
 ```
@@ -20,6 +21,7 @@ podman compose exec dev bash
 If your system uses the standalone Compose provider, these commands may be:
 
 ```bash
+mkdir -p workspace
 podman-compose up -d --build
 podman-compose exec dev bash
 ```
@@ -46,7 +48,7 @@ omx doctor
 
 ## Codex / GitHub login
 
-No volumes are used, so login state is disposable. In each fresh container, run only the credentialed login steps you need:
+Credential state is still disposable. In each fresh container, run only the credentialed login steps you need:
 
 ```bash
 codex --login
@@ -64,6 +66,20 @@ Do not commit login state, tokens, `.env`, `.codex/`, or `.omx/`.
 - `cargo build --workspace --release` inside the installed `oh-my-codex` package so `omx explore`, `omx sparkshell`, and runtime helpers do not need first-use Rust builds in a fresh container.
 - Korean UTF-8 locale and tmux clipboard/mouse configuration.
 
+## Workspace model
+
+- `/workspace`: container-local working directory. Do normal coding and Git work here.
+- `/host-workspace`: host-mounted scratch/export directory backed by `./workspace`. Use it only when you intentionally want files visible to the host GUI or want to copy artifacts out.
+- `./workspace` is ignored by Git in this repo.
+- Container-local files, caches, login state, and `/workspace` contents disappear when the container is removed, so push important work to GitHub.
+
+If you use Podman on an SELinux host and get permission errors on the scratch mount, change it to:
+
+```yaml
+volumes:
+  - ./workspace:/host-workspace:Z
+```
+
 ## Stop
 
 ```bash
@@ -80,8 +96,8 @@ podman-compose down
 ## Mental model
 
 - `Containerfile` = reproducible image setup.
-- `compose.yml` = disposable container runtime.
-- No `volumes:` are configured. Container-local files, caches, login state, and workspace contents disappear when the container is removed.
+- `compose.yml` = container runtime plus host scratch mount.
+- Work in `/workspace`; use `/host-workspace` only for deliberate host exchange.
 - Keep important work in GitHub or another host-managed location by committing and pushing it.
 
 ## Korean / UTF-8 tmux
