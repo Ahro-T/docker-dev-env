@@ -1,19 +1,19 @@
 # Podman Dev Environment
 
-Disposable Podman development environment for daily work with Codex/OMX. The container keeps normal work in container-local `/workspace`; the host-mounted `./workspace` directory is available only as a scratch/export area at `/host-workspace`.
+Disposable Podman development environment for daily work with Codex/OMX. The container keeps normal work in container-local `/workspace`; the host-mounted `./shared` directory is available only as a file exchange area at `/shared`.
 
 ## Files
 
 - `Containerfile`: builds the development image with Node, rustup-managed Rust, Codex, OMX, tmux, GitHub CLI, Korean UTF-8 locale support, non-secret OMX setup, and prebuilt OMX Rust helpers.
-- `compose.yml`: starts the development container with `/workspace` as the local working directory and `./workspace` mounted separately at `/host-workspace`.
+- `compose.yml`: starts the development container with `/workspace` as the local working directory and `./shared` mounted separately at `/shared`.
 - `scripts/bootstrap.sh`: verifies the baked tools and OMX health inside the container.
-- `.gitignore`: prevents secrets, local state, local scratch files, and build output from being committed.
+- `.gitignore`: prevents secrets, local state, shared/export files, and build output from being committed.
 - `.env.example`: safe example environment file.
 
 ## Start
 
 ```bash
-mkdir -p workspace
+mkdir -p shared
 podman compose up -d --build
 podman compose exec dev bash
 ```
@@ -21,7 +21,7 @@ podman compose exec dev bash
 If your system uses the standalone Compose provider, these commands may be:
 
 ```bash
-mkdir -p workspace
+mkdir -p shared
 podman-compose up -d --build
 podman-compose exec dev bash
 ```
@@ -69,15 +69,15 @@ Do not commit login state, tokens, `.env`, `.codex/`, or `.omx/`.
 ## Workspace model
 
 - `/workspace`: container-local working directory. Do normal coding and Git work here.
-- `/host-workspace`: host-mounted scratch/export directory backed by `./workspace`. Use it only when you intentionally want files visible to the host GUI or want to copy artifacts out.
-- `./workspace` is ignored by Git in this repo.
+- `/shared`: host-mounted file exchange directory backed by `./shared`. Use it only when you intentionally want files visible to the host GUI or want to copy artifacts out.
+- `./shared` is ignored by Git in this repo.
 - Container-local files, caches, login state, and `/workspace` contents disappear when the container is removed, so push important work to GitHub.
 
 If you use Podman on an SELinux host and get permission errors on the scratch mount, change it to:
 
 ```yaml
 volumes:
-  - ./workspace:/host-workspace:Z
+  - ./shared:/shared:Z
 ```
 
 ## Stop
@@ -96,8 +96,8 @@ podman-compose down
 ## Mental model
 
 - `Containerfile` = reproducible image setup.
-- `compose.yml` = container runtime plus host scratch mount.
-- Work in `/workspace`; use `/host-workspace` only for deliberate host exchange.
+- `compose.yml` = container runtime plus host file exchange mount.
+- Work in `/workspace`; use `/shared` only for deliberate host exchange.
 - Keep important work in GitHub or another host-managed location by committing and pushing it.
 
 ## Korean / UTF-8 tmux

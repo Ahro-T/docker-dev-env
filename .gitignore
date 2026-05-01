@@ -19,5 +19,5 @@ build/
 # Codex / OMX local state
 .codex/
 .omx/
-# Local scratch workspace
-workspace/
+# Host file exchange directory
+shared/
