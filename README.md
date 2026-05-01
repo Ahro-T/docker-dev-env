@@ -1,18 +1,18 @@
 # Podman Dev Environment
 
-Podman development environment for daily work with Codex/OMX. Project files under `./workspace` are mounted into the container at `/workspace` so they are visible from the host GUI.
+Disposable Podman development environment for daily work with Codex/OMX. This setup intentionally does not use persistent volumes, so the container can be deleted and recreated from GitHub without preserving local state.
 
 ## Files
 
-- `Containerfile`: builds the development image.
-- `compose.yml`: starts the development container and mounts `./workspace` to `/workspace`.
+- `Containerfile`: builds the development image with Node, rustup-managed Rust, Codex, OMX, tmux, GitHub CLI, Korean UTF-8 locale support, non-secret OMX setup, and prebuilt OMX Rust helpers.
+- `compose.yml`: starts the disposable development container without volumes.
+- `scripts/bootstrap.sh`: verifies the baked tools and OMX health inside the container.
 - `.gitignore`: prevents secrets, local state, and build output from being committed.
 - `.env.example`: safe example environment file.
 
 ## Start
 
 ```bash
-mkdir -p workspace
 podman compose up -d --build
 podman compose exec dev bash
 ```
@@ -20,7 +20,6 @@ podman compose exec dev bash
 If your system uses the standalone Compose provider, these commands may be:
 
 ```bash
-mkdir -p workspace
 podman-compose up -d --build
 podman-compose exec dev bash
 ```
@@ -28,8 +27,16 @@ podman-compose exec dev bash
 ## Verify inside the container
 
 ```bash
+scripts/bootstrap.sh
+```
+
+The script checks:
+
+```bash
 node -v
 cargo --version
+rustc --version
+rustup --version
 tmux -V
 gh --version
 codex --version
@@ -37,15 +44,25 @@ omx --version
 omx doctor
 ```
 
-## Codex / OMX setup
+## Codex / GitHub login
 
-Inside the container, initialize Codex and OMX:
+No volumes are used, so login state is disposable. In each fresh container, run only the credentialed login steps you need:
 
 ```bash
 codex --login
-omx setup
-omx doctor
+gh auth login
 ```
+
+Do not commit login state, tokens, `.env`, `.codex/`, or `.omx/`.
+
+## What is baked into the image
+
+- Rust toolchain: rustup-managed stable `cargo` and `rustc` because Debian bookworm apt Rust is too old for current OMX native crates.
+- Build packages needed by Rust/native Node tooling: `build-essential`, `pkg-config`, and `libssl-dev`.
+- Codex CLI and oh-my-codex from npm.
+- `omx setup --scope user --plugin --force` for non-secret OMX scaffolding.
+- `cargo build --workspace --release` inside the installed `oh-my-codex` package so `omx explore`, `omx sparkshell`, and runtime helpers do not need first-use Rust builds in a fresh container.
+- Korean UTF-8 locale and tmux clipboard/mouse configuration.
 
 ## Stop
 
@@ -62,48 +79,10 @@ podman-compose down
 
 ## Mental model
 
-- `Containerfile` = how to build the image.
-- `compose.yml` = how to run the container.
-- `./workspace` on the host is mounted to `/workspace` in the container. Files there are visible in the host GUI and persist after container recreation.
-- Container-local state outside `/workspace` is still disposable.
-
-## GitHub login
-
-Inside the container, run:
-
-```bash
-gh auth login
-```
-
-Recommended choices:
-
-- GitHub.com
-- HTTPS
-- Login with a web browser
-
-GitHub login is not persisted because only `/workspace` is mounted. If you delete and recreate the container, run `gh auth login` again.
-
-## Workspace volume
-
-The compose file mounts the host directory `./workspace` to `/workspace` in the container:
-
-```yaml
-volumes:
-  - ./workspace:/workspace
-```
-
-If you use Podman on an SELinux host and get permission errors, change it to:
-
-```yaml
-volumes:
-  - ./workspace:/workspace:Z
-```
-
-Before recreating an older no-volume container, copy any important existing files out of the container:
-
-```bash
-podman compose exec dev tar -C /workspace -cf - . | tar -C ./workspace -xf -
-```
+- `Containerfile` = reproducible image setup.
+- `compose.yml` = disposable container runtime.
+- No `volumes:` are configured. Container-local files, caches, login state, and workspace contents disappear when the container is removed.
+- Keep important work in GitHub or another host-managed location by committing and pushing it.
 
 ## Korean / UTF-8 tmux
 
@@ -129,4 +108,3 @@ Keyboard copy inside tmux:
 6. Press `Ctrl-b` then `]` to paste from the tmux buffer.
 
 The image enables `set-clipboard on` and `terminal-features` clipboard support, so copying may also reach the host OS clipboard when the outer terminal supports tmux/OSC 52 clipboard integration. To bypass tmux and use the terminal's native selection, hold `Shift` while dragging in many terminals.
-

@@ -18,7 +18,6 @@ build/
 
 # Codex / OMX local state
 .codex/
-.omx/state/
-.omx/logs/
-# Host-mounted working directory
+.omx/
+# Local scratch workspace
 workspace/

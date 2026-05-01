@@ -3,7 +3,6 @@ FROM node:20-bookworm
 RUN apt-get update && apt-get install -y \
     git curl ca-certificates tmux gh locales \
     build-essential pkg-config libssl-dev \
-    cargo rustc \
  && sed -i 's/^# *ko_KR.UTF-8 UTF-8/ko_KR.UTF-8 UTF-8/' /etc/locale.gen \
  && locale-gen ko_KR.UTF-8 \
  && update-locale LANG=ko_KR.UTF-8 LC_ALL=ko_KR.UTF-8 \
@@ -11,9 +10,24 @@ RUN apt-get update && apt-get install -y \
 
 ENV LANG=ko_KR.UTF-8 \
     LC_ALL=ko_KR.UTF-8 \
-    LC_CTYPE=ko_KR.UTF-8
+    LC_CTYPE=ko_KR.UTF-8 \
+    RUSTUP_HOME=/usr/local/rustup \
+    CARGO_HOME=/usr/local/cargo \
+    PATH=/usr/local/cargo/bin:$PATH
+
+ARG RUST_TOOLCHAIN=stable
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs \
+    | sh -s -- -y --profile minimal --default-toolchain ${RUST_TOOLCHAIN} --no-modify-path
 
 RUN npm install -g @openai/codex oh-my-codex
+
+# Bake non-secret OMX setup and native Rust helpers into the image so fresh
+# disposable containers do not repeat setup or first-use cargo builds.
+RUN cd /tmp \
+ && omx setup --scope user --plugin --force \
+ && rm -rf /tmp/.omx \
+ && cd /usr/local/lib/node_modules/oh-my-codex \
+ && cargo build --workspace --release
 
 RUN mkdir -p /workspace \
  && { \
