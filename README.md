@@ -44,6 +44,8 @@ gh --version
 codex --version
 omx --version
 omx doctor
+
+# Also compares installed Codex CLI against npm latest.
 ```
 
 ## Codex / GitHub login
@@ -61,7 +63,7 @@ Do not commit login state, tokens, `.env`, `.codex/`, or `.omx/`.
 
 - Rust toolchain: rustup-managed stable `cargo` and `rustc` because Debian bookworm apt Rust is too old for current OMX native crates.
 - Build packages needed by Rust/native Node tooling: `build-essential`, `pkg-config`, and `libssl-dev`.
-- Codex CLI and oh-my-codex from npm.
+- Codex CLI and oh-my-codex from npm using explicit `@latest` tags at image build time.
 - `omx setup --scope user --plugin --force` for non-secret OMX scaffolding.
 - `cargo build --workspace --release` inside the installed `oh-my-codex` package so `omx explore`, `omx sparkshell`, and runtime helpers do not need first-use Rust builds in a fresh container.
 - Korean UTF-8 locale and tmux clipboard/mouse configuration.

@@ -19,7 +19,7 @@ ARG RUST_TOOLCHAIN=stable
 RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs \
     | sh -s -- -y --profile minimal --default-toolchain ${RUST_TOOLCHAIN} --no-modify-path
 
-RUN npm install -g @openai/codex oh-my-codex
+RUN npm install -g @openai/codex@latest oh-my-codex@latest
 
 # Bake non-secret OMX setup and native Rust helpers into the image so fresh
 # disposable containers do not repeat setup or first-use cargo builds.
