@@ -13,6 +13,8 @@ Disposable Podman development environment for daily work with Codex/OMX. The con
 ## Start
 
 ```bash
+git clone https://github.com/Ahro-T/docker-dev-env.git docker-env
+cd docker-env
 mkdir -p shared
 podman compose up -d --build
 podman compose exec dev bash
@@ -21,6 +23,8 @@ podman compose exec dev bash
 If your system uses the standalone Compose provider, these commands may be:
 
 ```bash
+git clone https://github.com/Ahro-T/docker-dev-env.git docker-env
+cd docker-env
 mkdir -p shared
 podman-compose up -d --build
 podman-compose exec dev bash
