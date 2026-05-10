@@ -4,9 +4,10 @@ Disposable Podman development environment for daily work with Codex/OMX. The con
 
 ## Files
 
-- `Containerfile`: builds the development image with Node, rustup-managed Rust, Codex, OMX, tmux, GitHub CLI, Korean UTF-8 locale support, non-secret OMX setup, and prebuilt OMX Rust helpers.
+- `Containerfile`: builds the development image with Node, rustup-managed Rust, Codex, OMX, tmux, GitHub CLI, Korean UTF-8 locale support, non-secret Codex/OMX defaults, warning suppression, HUD/status-line defaults, and prebuilt OMX Rust helpers.
 - `compose.yml`: starts the development container with `/workspace` as the local working directory and `./shared` mounted separately at `/shared`.
-- `scripts/bootstrap.sh`: verifies the baked tools and OMX health inside the container.
+- `scripts/bootstrap.sh`: verifies the baked tools and refreshes non-secret Codex/OMX settings inside the container. The image also installs it as `bootstrap-dev-env`.
+- `scripts/configure-codex-omx.sh`: non-secret setup script baked into the image as `configure-codex-omx`; refreshes OMX setup, Codex warning suppression, HUD/status-line, feature flags, and native-agent defaults without copying credentials or logs.
 - `.gitignore`: prevents secrets, local state, shared/export files, and build output from being committed.
 - `.env.example`: safe example environment file.
 
@@ -33,10 +34,12 @@ podman-compose exec dev bash
 ## Verify inside the container
 
 ```bash
-scripts/bootstrap.sh
+bootstrap-dev-env
+# or, if you are running from a checked-out copy inside the container:
+# scripts/bootstrap.sh
 ```
 
-The script checks:
+The script checks and refreshes:
 
 ```bash
 node -v
@@ -47,9 +50,10 @@ tmux -V
 gh --version
 codex --version
 omx --version
+configure-codex-omx
 omx doctor
 
-# Also compares installed Codex CLI against npm latest.
+# Also verifies the baked Codex/OMX defaults and compares installed Codex CLI against npm latest.
 ```
 
 ## Codex / GitHub login
@@ -68,9 +72,10 @@ Do not commit login state, tokens, `.env`, `.codex/`, or `.omx/`.
 - Rust toolchain: rustup-managed stable `cargo` and `rustc` because Debian bookworm apt Rust is too old for current OMX native crates.
 - Build packages needed by Rust/native Node tooling: `build-essential`, `pkg-config`, and `libssl-dev`.
 - Codex CLI and oh-my-codex from npm using explicit `@latest` tags at image build time.
-- `omx setup --scope user --plugin --force` for non-secret OMX scaffolding.
+- `configure-codex-omx` runs `omx setup --scope user --legacy --force`, then pins the non-secret Codex/OMX defaults that make the current environment clean: no unstable-feature warning, OMX HUD/status-line enabled, native hooks/goals/agents enabled, MCP servers configured by OMX, direct `~/.codex/skills`/`~/.codex/prompts` installation, and explore routing enabled.
 - `cargo build --workspace --release` inside the installed `oh-my-codex` package so `omx explore`, `omx sparkshell`, and runtime helpers do not need first-use Rust builds in a fresh container.
 - Korean UTF-8 locale and tmux clipboard/mouse configuration.
+- `bootstrap-dev-env` in `/usr/local/bin` so the health check is available even when `/workspace` is empty.
 
 ## Workspace model
 

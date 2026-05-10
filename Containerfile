@@ -21,10 +21,14 @@ RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs \
 
 RUN npm install -g @openai/codex@latest oh-my-codex@latest
 
+COPY scripts/configure-codex-omx.sh /usr/local/bin/configure-codex-omx
+COPY scripts/bootstrap.sh /usr/local/bin/bootstrap-dev-env
+RUN chmod +x /usr/local/bin/configure-codex-omx /usr/local/bin/bootstrap-dev-env
+
 # Bake non-secret OMX setup and native Rust helpers into the image so fresh
 # disposable containers do not repeat setup or first-use cargo builds.
 RUN cd /tmp \
- && omx setup --scope user --plugin --force \
+ && configure-codex-omx \
  && rm -rf /tmp/.omx \
  && cd /usr/local/lib/node_modules/oh-my-codex \
  && cargo build --workspace --release

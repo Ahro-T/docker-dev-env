@@ -20,8 +20,17 @@ if [ -n "${latest_codex}" ] && [ "${installed_codex}" != "${latest_codex}" ]; th
   echo "WARNING: Codex CLI is not npm latest; rebuild the image to refresh it."
 fi
 
-echo "== OMX health =="
-omx doctor
+echo "== OMX non-secret config refresh =="
+if command -v configure-codex-omx >/dev/null 2>&1; then
+  configure-codex-omx
+else
+  "$(dirname "$0")/configure-codex-omx.sh"
+fi
+
+CODEX_CONFIG="${CODEX_HOME:-/root/.codex}/config.toml"
+echo "== Codex / OMX baked defaults =="
+grep -E "^(suppress_unstable_features_warning|model|model_reasoning_effort|service_tier) =" "$CODEX_CONFIG" || true
+grep -A2 "^\[tui\]" "$CODEX_CONFIG" || true
 
 echo "== auth status =="
 gh auth status || true
@@ -36,5 +45,5 @@ container, run the login steps again when needed:
   codex --login
   gh auth login
 
-Non-secret OMX setup and Rust native helper builds are baked into the image.
+Non-secret Codex/OMX setup, warning suppression, HUD defaults, and Rust native helper builds are baked into the image. Re-running this bootstrap script refreshes those non-secret settings without touching login state.
 MSG
